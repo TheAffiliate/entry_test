@@ -24,19 +24,15 @@ npx hardhat test
 
 ### 1.1 The test I wrote
 
-- **Test file and name:**
-- **What it checks:**
-- **Steps:**
-- **Expected result:**
-- **Does it pass?** [yes / no / partly]
+- **Test file and name:** `test/partBOwn.test.js` — `prevents a second payout after approval`
+- **What it checks:** that once a bounty is approved and paid, it cannot be paid again; this checks the Completed-state guard and the reentrancy-safe flow.
+- **Steps:** register a freelancer, post a bounty, apply, submit work, approve and pay once, then attempt the same approval again.
+- **Expected result:** the second approval reverts because the bounty status is already `Completed`.
+- **Does it pass?** [yes]
 
 ### 1.2 A scenario I did NOT have time to test
 
-Describe one thing that could go wrong with this contract that neither you nor
-the auto-marker checked. You do not have to write the code - just show you can
-see the gap.
-
-[Write your response here]
+One gap I noticed is the dispute flow: if an employer never approves or rejects work, a valid freelancer can be left unpaid even when the submission was real. I did not test a timeout or dispute mechanism, but that is a likely real-world failure mode in any simple bounty board.
 
 ---
 
@@ -45,23 +41,15 @@ see the gap.
 
 ### 2.1 The test I wrote
 
-- **Test file and name:**
-- **What it checks:**
-- **Steps:**
-- **Expected result:**
-- **Does it pass?** [yes / no / partly]
+- **Test file and name:** `test/partBOwn.test.js` — `tracks repeat entries and resets after a valid draw`
+- **What it checks:** that repeat entries count towards the total entry count but only count once for the unique-player count, and that a finished round resets cleanly.
+- **Steps:** enter the same address twice, add two more unique addresses, wait 24 hours, draw the winner, then check the round state is reset.
+- **Expected result:** `getEntryCount` reflects 2 entries for the repeat player, `getPlayerCount` is 4, `getUniquePlayerCount` is 3, and after drawing, the contract has a zero pot and zero entries in the next round.
+- **Does it pass?** [yes]
 
 ### 2.2 The hard one
 
-Testing a raffle is awkward because the winner changes every run. **How would
-you write a test for a function whose result you cannot predict?** What can you
-assert that is true no matter who wins?
-
-(Hint: look at how the marker's own "pays 90% of the pot" test handles this -
-it is in `grading/tests/DecentralisedRaffle.grading.test.js` and you are welcome
-to read it.)
-
-[Write your response here]
+Testing a raffle is awkward because the winner changes every run. The right way is to avoid asserting on a specific address and instead assert on things that must always be true: the winner must be one of the entrants, the prize transferred must be exactly 90% of the pot, the owner receives the remaining 10%, and the round resets afterwards. That is the same principle used in the grader’s own raffle tests.
 
 ---
 
@@ -70,20 +58,18 @@ to read it.)
 Pick **one** of your two contracts. If you wanted to steal from it or break it,
 what would you try first?
 
-- **Contract:**
-- **My attack:**
-- **Does it work against my implementation?** [yes / no / not sure]
-- **If it works, what would fix it?**
+- **Contract:** FreelanceBountyBoard
+- **My attack:** A malicious freelancer contract could try to re-enter `approveAndPay()` from its `receive()` or fallback function, so it can call the function again before the bounty is marked `Completed`.
+- **Does it work against my implementation?** [no]
+- **If it works, what would fix it?** The fix is the checks-effects-interactions pattern: mark the bounty as `Completed` before sending ETH, and only then call the external transfer. That is exactly what the implementation does now.
 
 An honest "yes, this attack works against my code, and here is the fix" scores
 full marks here. Claiming your contract is perfect scores nothing.
-
-[Write your response here]
 
 ---
 
 ## Checklist
 
-- [ ] At least one test of my own in `test/`
-- [ ] `npx hardhat test` runs without crashing
-- [ ] I filled in the attacker section above
+- [x] At least one test of my own in `test/`
+- [x] `npx hardhat test` runs without crashing
+- [x] I filled in the attacker section above
