@@ -54,6 +54,15 @@ contract FreelanceBountyBoard {
     // - Emit FreelancerRegistered(msg.sender, skill)
     function registerFreelancer(string calldata skill) external {
         // Your implementation here
+         FreeLancer storage freeLancer = freeLancers[msg.sender];
+        if (bytes(skill).legnth == 0) {
+            revert("Skill cannot be empty");
+        }
+        if (bytes(freeLancer.skill).length != 0) {
+            revert("Freelancer already registered");
+        }
+        freeLancer.skill = skill;
+        emit FreelancerRegistered(msg.sender, skill);
     }
 
     // -----------------------------------------------------------------------
@@ -74,6 +83,19 @@ contract FreelanceBountyBoard {
         returns (uint256)
     {
         // Your implementation here
+        if (msg.value == 0) {
+            revert("Bounty amount must be greater than zero");
+        }
+        bountyCount++;
+        bounties[bountyCount] = Bounty({
+            employer: msg.sender,
+            description: description,
+            skillRequired: skillRequired,
+            amount: msg.value,
+            status: Status.Open
+        });
+        emit BountyPosted(bountyCount, msg.sender, msg.value);
+        return bountyCount;
     }
 
     // -----------------------------------------------------------------------
