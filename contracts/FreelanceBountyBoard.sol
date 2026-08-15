@@ -54,14 +54,13 @@ contract FreelanceBountyBoard {
     // - Emit FreelancerRegistered(msg.sender, skill)
     function registerFreelancer(string calldata skill) external {
         // Your implementation here
-         FreeLancer storage freeLancer = freeLancers[msg.sender];
-        if (bytes(skill).legnth == 0) {
+        if (bytes(skill).length == 0) {
             revert("Skill cannot be empty");
         }
-        if (bytes(freeLancer.skill).length != 0) {
+        if (bytes(freelancers[msg.sender].skill).length != 0) {
             revert("Freelancer already registered");
         }
-        freeLancer.skill = skill;
+        freelancers[msg.sender].skill = skill;
         emit FreelancerRegistered(msg.sender, skill);
     }
 
@@ -112,12 +111,13 @@ contract FreelanceBountyBoard {
     //   keccak256(bytes(a)) == keccak256(bytes(b))
     function applyForBounty(uint256 bountyId) external {
         // Your implementation here
-        require(bytes(freelancers[msg.sender].skill).length != 0, "Caller is not a registered freelancer");
-        bouunty storage bounty = bounties[bountyId];
+       require(bytes(freelancers[msg.sender].skill).length != 0, "Caller is not a registered freelancer");
+        Bounty storage bounty = bounties[bountyId];
+        require(bounty.employer != address(0), "Bounty does not exist");
         require(bounty.status == Status.Open, "Bounty is not open");
         require(keccak256(bytes(freelancers[msg.sender].skill)) == keccak256(bytes(bounty.skillRequired)), "Freelancer skill does not match bounty requirement");
-        require(!hasApplied[bountyId][msg.sender], "Freelancer has already applied for this bounty");
-        hasApplied[bountyId][msg.sender] = true;
+        require(!_applied[bountyId][msg.sender], "Freelancer has already applied for this bounty");
+        _applied[bountyId][msg.sender] = true;
         emit AppliedForBounty(bountyId, msg.sender);
     }
 
@@ -131,8 +131,8 @@ contract FreelanceBountyBoard {
     // - Emit WorkSubmitted(bountyId, msg.sender, submissionUrl)
     function submitWork(uint256 bountyId, string calldata submissionUrl) external {
         // Your implementation here
-        submit storage bounty = bounties[bountyId];
-        require(hasApplied[bountyId][msg.sender],"Caller has not applied for this bounty");
+        require(_applied[bountyId][msg.sender], "Freelancer has not applied for this bounty");
+        Bounty storage bounty = bounties[bountyId];
         require(bounty.status == Status.Open, "Bounty is not open");
         bounty.status = Status.Submitted;
         emit WorkSubmitted(bountyId, msg.sender, submissionUrl);
@@ -156,14 +156,13 @@ contract FreelanceBountyBoard {
     // rather than transfer() or send().
     function approveAndPay(uint256 bountyId, address freelancer) external {
         // Your implementation here
-        approve storage bounty = bounties[bountyId];
-        require(msg.sender == bounty.employyer, "Only the employer can approve and pay");
-        require(bounty.status == Status.Submitted, "Bounty is not in submitted status");
+        Bounty storage bounty = bounties[bountyId];
+        require(msg.sender == bounty.employer, "Only the employer can approve and pay");
+        require(bounty.status == Status.Submitted, "Bounty is not submitted");
         bounty.status = Status.Completed;
-        uint256 amount = bounty.amount;
-        (bool ok, ) = freelancer.call{value: amount}("");
+        (bool ok, ) = freelancer.call{value: bounty.amount}("");
         require(ok, "Transfer failed");
-        emit BountyPaid(bountyId, freelance, amount);
+        emit BountyPaid(bountyId, freelancer, bounty.amount);
     }
 
     // -----------------------------------------------------------------------
@@ -184,11 +183,19 @@ contract FreelanceBountyBoard {
     /// @notice The skill this freelancer registered with ("" if unregistered)
     function getSkill(address freelancer) external view returns (string memory) {
         // Your implementation here
+        if getSkill[freelancer] == 0{
+            return "this freelance is not registered";
+        }
     }
 
     /// @notice True if this freelancer applied for this bounty
     function hasApplied(uint256 bountyId, address freelancer) external view returns (bool) {
         // Your implementation here
+        if hasApplied[bountyId][freelacer == true{
+            else{
+                return false;
+            }
+        }]
     }
 
     /// @notice All of a bounty's details, in this exact order
@@ -204,6 +211,14 @@ contract FreelanceBountyBoard {
         )
     {
         // Your implementation here
+        getBounty storage bounty = bounties[bountyId];
+        return(
+            bounty.employer
+            bounty.description.
+            bounty.skillRequired,
+            bounty.amount,
+            bounty.status
+        )
     }
 
     // BONUS (not auto-marked, describe it in PartB_Design.md instead):
