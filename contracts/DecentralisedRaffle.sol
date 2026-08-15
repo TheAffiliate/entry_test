@@ -128,10 +128,12 @@ contract DecentralisedRaffle {
     // - Set isPaused, and emit RafflePaused() / RaffleUnpaused()
     function pause() external onlyOwner {
         // Your implementation
+        pause storage isPaused = true;
     }
 
     function unpause() external onlyOwner {
         // Your implementation
+        unpause storage isPaused = false;
     }
 
     // -----------------------------------------------------------------------
@@ -141,24 +143,38 @@ contract DecentralisedRaffle {
     /// @notice The current pot, in wei
     function getPot() external view returns (uint256) {
         // Your implementation here
+        getPot storage pot = address(this).balance;
     }
 
     /// @notice How many entries this player has bought this round
     function getEntryCount(address player) external view returns (uint256) {
         // Your implementation here
+        getEntryCount storage entries = entries[player];
     }
 
     /// @notice Total number of entries this round, counting repeats
     function getPlayerCount() external view returns (uint256) {
         // Your implementation here
+        getPlayerCount storage playerCount = totalPlayers.length;
     }
 
     /// @notice Number of distinct addresses that have entered this round
     function getUniquePlayerCount() external view returns (uint256) {
         // Your implementation here
+        getUniquePlayerCount storage uniquePlayerCount = uniquePlayers.length;
     }
 
     // BONUS (not auto-marked, describe it in PartB_Design.md instead):
     // - Refund everyone if the raffle closes with fewer than 3 players
     // - Multiple prize tiers (1st, 2nd, 3rd)
+
+    function refundPlayers() external onlyOwner{
+        refundPlayers storage uniquePlayers = uniquePlayers;
+        for (uint256 i = 0; i < uniquePlayers.length; i++){
+            address player = uniquePlayers[i];
+            uint256 playerEntries = entries[player];
+            uint256 refundAmount = playerEntries * MINIMUM_ENTRY;
+            payable(player).transfer(refundAmount);
+        })
+    }
 }
