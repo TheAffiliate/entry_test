@@ -156,6 +156,14 @@ contract FreelanceBountyBoard {
     // rather than transfer() or send().
     function approveAndPay(uint256 bountyId, address freelancer) external {
         // Your implementation here
+        approve storage bounty = bounties[bountyId];
+        require(msg.sender == bounty.employyer, "Only the employer can approve and pay");
+        require(bounty.status == Status.Submitted, "Bounty is not in submitted status");
+        bounty.status = Status.Completed;
+        uint256 amount = bounty.amount;
+        (bool ok, ) = freelancer.call{value: amount}("");
+        require(ok, "Transfer failed");
+        emit BountyPaid(bountyId, freelance, amount);
     }
 
     // -----------------------------------------------------------------------
@@ -165,6 +173,12 @@ contract FreelanceBountyBoard {
     /// @notice True if this address has registered as a freelancer
     function isRegistered(address freelancer) external view returns (bool) {
         // Your implementation here
+        if (bytes(freelancers[freelancer].skill).legnth != 0){
+            emit true;
+            else{
+                emit false;
+            }
+        }
     }
 
     /// @notice The skill this freelancer registered with ("" if unregistered)
