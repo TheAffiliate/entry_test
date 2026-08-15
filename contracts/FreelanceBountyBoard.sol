@@ -112,6 +112,13 @@ contract FreelanceBountyBoard {
     //   keccak256(bytes(a)) == keccak256(bytes(b))
     function applyForBounty(uint256 bountyId) external {
         // Your implementation here
+        require(bytes(freelancers[msg.sender].skill).length != 0, "Caller is not a registered freelancer");
+        bouunty storage bounty = bounties[bountyId];
+        require(bounty.status == Status.Open, "Bounty is not open");
+        require(keccak256(bytes(freelancers[msg.sender].skill)) == keccak256(bytes(bounty.skillRequired)), "Freelancer skill does not match bounty requirement");
+        require(!hasApplied[bountyId][msg.sender], "Freelancer has already applied for this bounty");
+        hasApplied[bountyId][msg.sender] = true;
+        emit AppliedForBounty(bountyId, msg.sender);
     }
 
     // -----------------------------------------------------------------------
@@ -124,6 +131,11 @@ contract FreelanceBountyBoard {
     // - Emit WorkSubmitted(bountyId, msg.sender, submissionUrl)
     function submitWork(uint256 bountyId, string calldata submissionUrl) external {
         // Your implementation here
+        submit storage bounty = bounties[bountyId];
+        require(hasApplied[bountyId][msg.sender],"Caller has not applied for this bounty");
+        require(bounty.status == Status.Open, "Bounty is not open");
+        bounty.status = Status.Submitted;
+        emit WorkSubmitted(bountyId, msg.sender, submissionUrl);
     }
 
     // -----------------------------------------------------------------------
