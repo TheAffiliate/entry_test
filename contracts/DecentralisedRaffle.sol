@@ -68,6 +68,17 @@ contract DecentralisedRaffle {
     // - Emit RaffleEntered(msg.sender, <this player's total entries so far>)
     function enterRaffle() external payable {
         // Your implementation here
+        if (msg.value < MINIMUM_ENTRY) {
+            revert("Entry amount is below minimum");
+        }
+        if (isPaused) {
+            revert("Raffle is paused");
+        }
+        if (entries[msg.sender] == 0){
+            uniquePlayers.push(msg.sender);
+        }
+        entries[msg.sender]++;
+        emit RaffleEntered(msg.sender, entries[msg.sender]);
     }
 
     // -----------------------------------------------------------------------
@@ -98,6 +109,15 @@ contract DecentralisedRaffle {
     // code.
     function selectWinner() external onlyOwner {
         // Your implementation here
+        selectWinner storage winner = uniquePlayers[uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % uniquePlayers.length];
+        uint256 prizeAmount = (address(this).balance * 90) / 100;
+        payable(winner).transfer(prizeAmount);
+        payable(owner).transfer(address(this).balance);
+        emit WinnerSelected(raffleId, winner, prizeAmount);
+        raffleId++;
+        delete uniquePlayers;
+        raffleStartTime = block.timestamp;
+    }
     }
 
     // -----------------------------------------------------------------------
