@@ -224,4 +224,11 @@ contract FreelanceBountyBoard {
     // BONUS (not auto-marked, describe it in PartB_Design.md instead):
     // What happens if the employer never approves work that was genuinely done?
     // Sketch a timeout or dispute mechanism.
+
+    function disputeMechanism(uint256 bountyId) external {
+        disputeMechanism storage bounty = bounties[bountyId];
+        require(msg.sender == bounty.employer, "Only the employer can initiate a dispute");
+        require(bounty.status == Status.Submitted, "Bounty is not in submitted status");
+        disputeResolution(bountyId);
+    }
 }
