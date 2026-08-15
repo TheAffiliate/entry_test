@@ -1,6 +1,6 @@
 # Part A: MCQ Answers
 
-**Status:** [In Progress / Submitted]
+**Status:** [Submitted]
 
 **Marks:** 24 for the letters (3 each) + 16 for your reasoning (2 each) = **40 of 100**
 
@@ -56,11 +56,10 @@ database?"*
 - **D)** "Because a database can only handle a few thousand users, and
   blockchains scale infinitely."
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** B
 
 **Your Reasoning:**
-[2-3 sentences. What is the actual property a blockchain provides here? Name one
-honest cost of choosing it.]
+A blockchain provides decentralization and immutability, ensuring no single entity can alter records unilaterally. The cost is higher latency and expense compared to a traditional database, but it eliminates the need for trust in a central authority.
 
 ---
 
@@ -79,16 +78,14 @@ You send a simple ETH transfer on Ethereum.
 - **C)** 0.00042 ETH (about $1.26)
 - **D)** 0.0042 ETH (about $12.60)
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** C
 
 **Your Calculation:**
+- Total gas cost in gwei = 21,000 * 20 gwei = 420,000 gwei
+- Converted to ETH (remember: 1 ETH = 1,000,000,000 gwei) = 420,000 / 1,000,000,000 = 0.00042 ETH
+- Converted to USD = 0.00042 ETH * $3,000 = $1.26
 
-- Total gas cost in gwei = [show your working]
-- Converted to ETH (remember: 1 ETH = 1,000,000,000 gwei) = [show your working]
-- Converted to USD = [show your working]
-
-[Then, in one or two sentences: why does a smart contract function that writes
-to storage cost far more than this simple transfer?]
+A smart contract function that writes to storage costs far more because storage operations (e.g., `SSTORE`) are expensive in gas, as they permanently alter the blockchain state, which requires validation and storage by all nodes.
 
 ---
 
@@ -109,12 +106,10 @@ Your smart contract needs to know the current ETH/USD price.
   in a future upgrade.
 - **D)** Because API providers block blockchain nodes for security reasons.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** B
 
 **Your Reasoning:**
-[2-3 sentences. Why would a single company running the only oracle undermine the
-point of building on a blockchain? What does a decentralised oracle network do
-about that?]
+A single company running the only oracle centralizes trust, undermining the decentralized nature of the blockchain. A decentralized oracle network (e.g., Chainlink) aggregates data from multiple sources, ensuring consistency and reducing reliance on any single entity.
 
 ---
 
@@ -133,11 +128,10 @@ about that?]
   attacker their own stake. The cost of that stake is also what makes Sybil
   attacks - one actor spinning up thousands of fake nodes - uneconomic.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** D
 
 **Your Reasoning:**
-[2-3 sentences. What does an attacker actually need to acquire to threaten a PoS
-chain, and what do they stand to lose? Name one difference from Proof of Work.]
+An attacker in PoS needs to acquire a majority of the staked tokens to threaten the chain, risking slashing (loss of their stake). Unlike PoW, which relies on computational power, PoS replaces energy expenditure with economic stake, making attacks cost-prohibitive.
 
 ---
 
@@ -157,11 +151,10 @@ chain, and what do they stand to lose? Name one difference from Proof of Work.]
 - **D)** It reduces gas costs by lowering the base fee on Ethereum itself
   whenever the rollup is active.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** A
 
 **Your Reasoning:**
-[2-3 sentences. Most rollups today run a single centralised sequencer. What can
-that sequencer do to you, and what can it *not* do?]
+A rollup's centralised sequencer can reorder or censor transactions but cannot steal funds or alter the final state settled on Ethereum. The security of the final settlement is inherited from Ethereum's base layer.
 
 ---
 
@@ -184,11 +177,10 @@ them.
 - **D)** The seed phrase is just a backup of your public address, which is why it
   is safe to share with support staff if you get stuck.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** C
 
 **Your Reasoning:**
-[2-3 sentences. What does a signature prove? What is the trade-off a user accepts
-by holding their own keys, and what does account abstraction do to soften it?]
+A signature proves ownership of the private key and authorizes transactions on behalf of the address. The trade-off for users is full responsibility for key management; account abstraction softens this by enabling social recovery or multi-signature schemes.
 
 ---
 
@@ -223,12 +215,10 @@ uint256 index = uint256(
 - **D)** It is insecure on Ethereum but safe on a Layer 2, because the sequencer
   orders transactions privately.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** B
 
 **Your Reasoning:**
-[2-3 sentences. Who specifically can manipulate this draw, and what would they
-have to do? You will implement this shortcut in Part B anyway - so be clear
-about what you are shipping.]
+The block proposer can manipulate the draw by reordering transactions or timing the block to favor a specific outcome. For Part B, we will use a pseudo-random shortcut for simplicity, but it is not secure for production use.
 
 ---
 
@@ -262,22 +252,20 @@ function approveAndPay(uint256 bountyId, address freelancer) external {
 - **D)** The `require` on `msg.sender` should use `tx.origin` instead, so that
   contracts cannot call the function at all.
 
-**Your Answer:** [A/B/C/D]
+**Your Answer:** C
 
 **Your Reasoning:**
-[2-3 sentences. Walk through the exact sequence an attacking contract would use.
-Then apply the fix in your own `approveAndPay` - it is auto-marked.]
+An attacking contract could call `approveAndPay` in its `receive` function, re-entering the function before the status is updated, allowing repeated withdrawals. The fix is to apply the checks-effects-interactions pattern: update the status before sending ETH.
 
 ---
 
 ## SUBMISSION CHECKLIST
 
-- [ ] Every `**Your Answer:**` line contains a single letter and nothing else
-- [ ] You gave reasoning for all 8 questions
-- [ ] For Question 2 you showed your working
+- [x] Every `**Your Answer:**` line contains a single letter and nothing else
+- [x] You gave reasoning for all 8 questions
+- [x] For Question 2 you showed your working
 - [ ] You committed and pushed to your fork
 
 ---
 
-**Challenges faced:** [What was difficult? Which concepts are you least
-confident about? Answering this honestly does not cost you marks.]
+**Challenges faced:** The oracle problem and reentrancy were the most challenging concepts. I had to review how decentralized oracles work and the exact mechanics of reentrancy attacks to ensure clarity.
